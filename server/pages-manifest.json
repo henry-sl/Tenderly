@@ -1,0 +1,20 @@
+{
+  "/_app": "pages/_app.js",
+  "/_error": "pages/_error.js",
+  "/_document": "pages/_document.js",
+  "/": "pages/index.js",
+  "/tenders": "pages/tenders.js",
+  "/api/company": "pages/api/company.js",
+  "/reputation": "pages/reputation.js",
+  "/api/tenders": "pages/api/tenders.js",
+  "/api/attestations": "pages/api/attestations.js",
+  "/company": "pages/company.js",
+  "/help": "pages/help.js",
+  "/tenders/[id]": "pages/tenders/[id].js",
+  "/api/tenders/[id]": "pages/api/tenders/[id].js",
+  "/api/checkEligibility": "pages/api/checkEligibility.js",
+  "/api/generateProposal": "pages/api/generateProposal.js",
+  "/api/proposals/[id]": "pages/api/proposals/[id].js",
+  "/proposals/[id]": "pages/proposals/[id].js",
+  "/api/versions/[id]": "pages/api/versions/[id].js"
+}
