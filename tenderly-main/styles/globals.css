@@ -1,0 +1,236 @@
+/* styles/globals.css */
+/* Global styles with optimized sidebar and layout utilities */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Base styles */
+@layer base {
+  body {
+    @apply bg-gray-50;
+  }
+}
+
+/* Custom component styles */
+@layer components {
+  /* Button styles */
+  .btn {
+    @apply inline-flex items-center px-4 py-2 rounded-md font-medium shadow-sm transition;
+  }
+  
+  /* Primary button - blue */
+  .btn-primary {
+    @apply bg-blue-600 text-white hover:bg-blue-700;
+  }
+  
+  /* Secondary button - gray outline */
+  .btn-secondary {
+    @apply border border-gray-300 text-gray-700 hover:bg-gray-50;
+  }
+  
+  /* Card component - white box with shadow */
+  .card {
+    @apply bg-white rounded-lg shadow p-4 hover:shadow-md transition;
+  }
+  
+  /* Skeleton loading animation */
+  .skeleton {
+    @apply animate-pulse bg-gray-200 rounded;
+  }
+
+  /* Optimized sidebar tooltip styles */
+  .sidebar-tooltip {
+    @apply absolute left-full ml-3 px-3 py-2 bg-gray-900 text-white text-sm rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap z-50 pointer-events-none;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+
+  .sidebar-tooltip::before {
+    @apply absolute right-full top-1/2 transform -translate-y-1/2 w-2 h-2 bg-gray-900 rotate-45;
+    content: '';
+    margin-right: -1px;
+  }
+
+  /* Optimized smooth transitions for sidebar */
+  .sidebar-transition {
+    @apply transition-all duration-300 ease-in-out;
+  }
+
+  /* Enhanced focus styles for accessibility */
+  .focus-ring {
+    @apply focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-white;
+  }
+
+  /* Content area transitions */
+  .content-transition {
+    @apply transition-all duration-300 ease-in-out;
+  }
+}
+
+/* Custom utilities */
+@layer utilities {
+  /* Text truncation with ellipsis */
+  .truncate-2-lines {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  /* Smooth scrolling */
+  .scroll-smooth {
+    scroll-behavior: smooth;
+  }
+
+  /* Hide scrollbar but keep functionality */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Balanced spacing utilities */
+  .spacing-balanced {
+    @apply px-4 py-6 lg:px-8 lg:py-8;
+  }
+
+  /* Content width constraints */
+  .content-width-balanced {
+    max-width: calc(100vw - 16rem); /* Account for expanded sidebar */
+  }
+
+  .content-width-collapsed {
+    max-width: calc(100vw - 4rem); /* Account for collapsed sidebar */
+  }
+}
+
+/* Animation keyframes */
+@keyframes slideIn {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideOut {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-100%);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Mobile-first responsive design helpers */
+@media (max-width: 768px) {
+  .mobile-padding {
+    @apply px-4 py-3;
+  }
+  
+  .mobile-text {
+    @apply text-sm;
+  }
+}
+
+/* Tablet optimizations */
+@media (min-width: 768px) and (max-width: 1024px) {
+  .tablet-spacing {
+    @apply px-6 py-4;
+  }
+}
+
+/* Desktop optimizations */
+@media (min-width: 1024px) {
+  .desktop-spacing {
+    @apply px-8 py-6;
+  }
+  
+  /* Sidebar width constraints */
+  .sidebar-collapsed {
+    width: 4rem; /* 64px */
+  }
+  
+  .sidebar-expanded {
+    width: 15rem; /* 240px - optimized width */
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .sidebar-item {
+    @apply border border-gray-400;
+  }
+  
+  .focus-ring {
+    @apply focus:ring-4 focus:ring-blue-600;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .sidebar-transition,
+  .content-transition {
+    @apply transition-none;
+  }
+  
+  .skeleton {
+    @apply animate-none;
+  }
+  
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Dark mode support (for future implementation) */
+@media (prefers-color-scheme: dark) {
+  /* Dark mode styles can be added here when needed */
+  .sidebar-tooltip {
+    @apply bg-gray-800 text-gray-100;
+  }
+}
+
+/* Print styles */
+@media print {
+  .sidebar,
+  .mobile-menu-button {
+    @apply hidden;
+  }
+  
+  .main-content {
+    @apply ml-0 w-full;
+  }
+}
+
+/* Large screen optimizations */
+@media (min-width: 1440px) {
+  .content-max-width {
+    max-width: 1200px;
+  }
+}
+
+/* Ultra-wide screen support */
+@media (min-width: 1920px) {
+  .content-ultra-wide {
+    max-width: 1400px;
+  }
+}
