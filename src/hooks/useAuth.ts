@@ -46,37 +46,12 @@ export function useAuth() {
   }
 
   const updateEmail = async (newEmail: string, password: string) => {
-    try {
-      // Use reauthenticate to verify the current password without creating a new session
-      const { error: reauthError } = await supabase.auth.reauthenticate()
-      
-      if (reauthError) {
-        // If reauthenticate fails, try the alternative approach with better error handling
-        const currentEmail = user?.email
-        if (!currentEmail) {
-          return { error: { message: 'No current user found' } }
-        }
+    const { data, error } = await supabase.auth.updateUser({
+      email: newEmail,
+      password: password,
+    })
 
-        // Create a temporary client to verify credentials without affecting current session
-        const { error: verifyError } = await supabase.auth.signInWithPassword({
-          email: currentEmail,
-          password,
-        })
-
-        if (verifyError) {
-          return { error: { message: 'Current password is incorrect' } }
-        }
-      }
-
-      // If verification successful, update the email
-      const { data, error } = await supabase.auth.updateUser({
-        email: newEmail,
-      })
-
-      return { data, error }
-    } catch (error) {
-      return { error: { message: 'An error occurred during authentication' } }
-    }
+    return { data, error }
   }
 
   const updatePassword = async (newPassword: string) => {
