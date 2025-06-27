@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import { Bell, Menu, Search, User, LogOut, Settings } from 'lucide-react';
 import { useAppContext } from '../../context/AppContext';
+import { useAuth } from '../../hooks/useAuth';
 
 /**
  * Top navigation bar with user menu, notifications, and search
  */
 const Navigation: React.FC = () => {
   const { state, dispatch } = useAppContext();
+  const { signOut, user } = useAuth();
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
 
@@ -14,6 +16,11 @@ const Navigation: React.FC = () => {
 
   const handleNotificationClick = (id: string) => {
     dispatch({ type: 'MARK_NOTIFICATION_READ', payload: id });
+  };
+
+  const handleSignOut = async () => {
+    await signOut();
+    setShowUserMenu(false);
   };
 
   return (
@@ -113,27 +120,19 @@ const Navigation: React.FC = () => {
                 aria-label="User menu"
                 aria-expanded={showUserMenu}
               >
-                {state.user?.avatar ? (
-                  <img
-                    src={state.user.avatar}
-                    alt={state.user.name}
-                    className="h-8 w-8 rounded-full object-cover"
-                  />
-                ) : (
-                  <div className="h-8 w-8 bg-gray-300 rounded-full flex items-center justify-center">
-                    <User className="h-4 w-4 text-gray-600" />
-                  </div>
-                )}
+                <div className="h-8 w-8 bg-gray-300 rounded-full flex items-center justify-center">
+                  <User className="h-4 w-4 text-gray-600" />
+                </div>
                 <span className="hidden sm:block text-sm font-medium text-gray-700">
-                  {state.user?.name}
+                  {user?.email?.split('@')[0] || 'User'}
                 </span>
               </button>
               
               {showUserMenu && (
                 <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
                   <div className="p-4 border-b border-gray-100">
-                    <p className="font-medium text-gray-900">{state.user?.name}</p>
-                    <p className="text-sm text-gray-500">{state.user?.company}</p>
+                    <p className="font-medium text-gray-900">{user?.email?.split('@')[0] || 'User'}</p>
+                    <p className="text-sm text-gray-500">{user?.email}</p>
                   </div>
                   <div className="py-2">
                     <a
@@ -150,7 +149,10 @@ const Navigation: React.FC = () => {
                       <Settings className="h-4 w-4 mr-3" />
                       Settings
                     </a>
-                    <button className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                    <button 
+                      onClick={handleSignOut}
+                      className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    >
                       <LogOut className="h-4 w-4 mr-3" />
                       Sign out
                     </button>

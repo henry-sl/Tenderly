@@ -16,6 +16,7 @@ import ErrorBoundary from './components/common/ErrorBoundary';
 function AppContent() {
   const { user, loading } = useAuth();
 
+  // Show loading spinner while checking authentication
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -27,10 +28,12 @@ function AppContent() {
     );
   }
 
+  // If user is not authenticated, show login form
   if (!user) {
     return <AuthForm />;
   }
 
+  // If user is authenticated, show the main application
   return (
     <AppProvider>
       <Router>
