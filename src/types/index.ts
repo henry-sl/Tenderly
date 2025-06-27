@@ -97,3 +97,17 @@ export interface EditorHistory {
   currentIndex: number;
   maxStates: number;
 }
+
+// Form data types for file uploads
+export interface CertificationFormData {
+  name: string;
+  issuedBy: string;
+  issueDate: string;
+  expiryDate?: string;
+}
+
+export interface DocumentFormData {
+  name: string;
+  type: string;
+  size: number;
+}

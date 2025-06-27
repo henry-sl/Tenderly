@@ -15,6 +15,12 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   }
 })
 
+// Storage bucket names
+export const STORAGE_BUCKETS = {
+  CERTIFICATIONS: 'certifications',
+  DOCUMENTS: 'documents'
+} as const
+
 // Database types
 export interface Database {
   public: {

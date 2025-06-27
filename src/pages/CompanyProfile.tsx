@@ -3,7 +3,7 @@ import ProfileHeader from '../components/profile/ProfileHeader';
 import ProfileContent from '../components/profile/ProfileContent';
 import { useAuth } from '../hooks/useAuth';
 import { companyService } from '../services/companyService';
-import { Company } from '../types';
+import { Company, CertificationFormData } from '../types';
 
 /**
  * Company profile page with editable sections and compliance tracking
@@ -108,6 +108,119 @@ const CompanyProfile: React.FC = () => {
     }
   };
 
+  const handleAddCertification = async (formData: CertificationFormData, file?: File): Promise<void> => {
+    if (!company) return;
+
+    try {
+      const certificationData = {
+        company_id: company.id,
+        name: formData.name,
+        issued_by: formData.issuedBy,
+        issue_date: formData.issueDate,
+        expiry_date: formData.expiryDate || null
+      };
+
+      const newCertification = await companyService.addCertification(certificationData, file);
+
+      // Update local state
+      setCompany(prevCompany => {
+        if (!prevCompany) return null;
+        
+        const transformedCertification = {
+          id: newCertification.id,
+          name: newCertification.name,
+          issuedBy: newCertification.issued_by,
+          issueDate: new Date(newCertification.issue_date),
+          expiryDate: newCertification.expiry_date ? new Date(newCertification.expiry_date) : undefined,
+          documentUrl: newCertification.document_url || undefined
+        };
+
+        return {
+          ...prevCompany,
+          certifications: [...prevCompany.certifications, transformedCertification]
+        };
+      });
+    } catch (error) {
+      console.error('Error adding certification:', error);
+      throw new Error('Failed to add certification. Please try again.');
+    }
+  };
+
+  const handleDeleteCertification = async (id: string): Promise<void> => {
+    try {
+      await companyService.deleteCertification(id);
+
+      // Update local state
+      setCompany(prevCompany => {
+        if (!prevCompany) return null;
+        
+        return {
+          ...prevCompany,
+          certifications: prevCompany.certifications.filter(cert => cert.id !== id)
+        };
+      });
+    } catch (error) {
+      console.error('Error deleting certification:', error);
+      throw new Error('Failed to delete certification. Please try again.');
+    }
+  };
+
+  const handleAddDocument = async (file: File): Promise<void> => {
+    if (!company) return;
+
+    try {
+      const documentData = {
+        name: file.name,
+        type: file.type,
+        size: file.size,
+        company_id: company.id
+      };
+
+      const newDocument = await companyService.addDocument(documentData, file);
+
+      // Update local state
+      setCompany(prevCompany => {
+        if (!prevCompany) return null;
+        
+        const transformedDocument = {
+          id: newDocument.id,
+          name: newDocument.name,
+          type: newDocument.type,
+          size: newDocument.size,
+          url: newDocument.url,
+          uploadDate: new Date(newDocument.upload_date)
+        };
+
+        return {
+          ...prevCompany,
+          documents: [...prevCompany.documents, transformedDocument]
+        };
+      });
+    } catch (error) {
+      console.error('Error adding document:', error);
+      throw new Error('Failed to upload document. Please try again.');
+    }
+  };
+
+  const handleDeleteDocument = async (id: string): Promise<void> => {
+    try {
+      await companyService.deleteDocument(id);
+
+      // Update local state
+      setCompany(prevCompany => {
+        if (!prevCompany) return null;
+        
+        return {
+          ...prevCompany,
+          documents: prevCompany.documents.filter(doc => doc.id !== id)
+        };
+      });
+    } catch (error) {
+      console.error('Error deleting document:', error);
+      throw new Error('Failed to delete document. Please try again.');
+    }
+  };
+
   if (loading) {
     return (
       <div className="max-w-4xl mx-auto">
@@ -157,7 +270,13 @@ const CompanyProfile: React.FC = () => {
       </div>
 
       <ProfileHeader company={company} onUpdateCompany={handleUpdateCompany} />
-      <ProfileContent company={company} />
+      <ProfileContent 
+        company={company}
+        onAddCertification={handleAddCertification}
+        onDeleteCertification={handleDeleteCertification}
+        onAddDocument={handleAddDocument}
+        onDeleteDocument={handleDeleteDocument}
+      />
     </div>
   );
 };

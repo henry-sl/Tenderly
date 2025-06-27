@@ -1,16 +1,26 @@
 import React, { useState } from 'react';
 import CertificationSection from './CertificationSection';
 import DocumentSection from './DocumentSection';
-import { Company } from '../../types';
+import { Company, CertificationFormData } from '../../types';
 
 interface ProfileContentProps {
   company: Company;
+  onAddCertification: (formData: CertificationFormData, file?: File) => Promise<void>;
+  onDeleteCertification: (id: string) => Promise<void>;
+  onAddDocument: (file: File) => Promise<void>;
+  onDeleteDocument: (id: string) => Promise<void>;
 }
 
 /**
  * Main content area for company profile with tabbed sections
  */
-const ProfileContent: React.FC<ProfileContentProps> = ({ company }) => {
+const ProfileContent: React.FC<ProfileContentProps> = ({ 
+  company, 
+  onAddCertification, 
+  onDeleteCertification, 
+  onAddDocument, 
+  onDeleteDocument 
+}) => {
   const [activeTab, setActiveTab] = useState('certifications');
 
   const tabs = [
@@ -45,11 +55,19 @@ const ProfileContent: React.FC<ProfileContentProps> = ({ company }) => {
       {/* Tab content */}
       <div className="p-6">
         {activeTab === 'certifications' && (
-          <CertificationSection certifications={company.certifications} />
+          <CertificationSection 
+            certifications={company.certifications}
+            onAddCertification={onAddCertification}
+            onDeleteCertification={onDeleteCertification}
+          />
         )}
         
         {activeTab === 'documents' && (
-          <DocumentSection documents={company.documents} />
+          <DocumentSection 
+            documents={company.documents}
+            onAddDocument={onAddDocument}
+            onDeleteDocument={onDeleteDocument}
+          />
         )}
       </div>
     </div>
