@@ -1,9 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import ToolbarSection from './ToolbarSection';
 import ContentArea from './ContentArea';
 import AutosaveIndicator from './AutosaveIndicator';
 import ExportControls from './ExportControls';
+import VersionHistoryModal from './VersionHistoryModal';
 import { proposalService } from '../../services/proposalService';
+import { useAuth } from '../../hooks/useAuth';
+import { useEditorHistory } from '../../hooks/useEditorHistory';
 import { Proposal } from '../../types';
 
 interface EditorContainerProps {
@@ -14,11 +17,32 @@ interface EditorContainerProps {
  * Main container for the proposal editor with toolbar and content areas
  */
 const EditorContainer: React.FC<EditorContainerProps> = ({ proposal }) => {
+  const { user } = useAuth();
   const [content, setContent] = useState(proposal.content);
   const [title, setTitle] = useState(proposal.title);
   const [lastSaved, setLastSaved] = useState(new Date(proposal.lastModified));
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [showVersionHistory, setShowVersionHistory] = useState(false);
+
+  // Initialize editor history
+  const {
+    addState,
+    undo,
+    redo,
+    getCurrentState,
+    canUndo,
+    canRedo,
+    initializeHistory
+  } = useEditorHistory({
+    maxStates: 50,
+    debounceMs: 1000
+  });
+
+  // Initialize history with current proposal content
+  useEffect(() => {
+    initializeHistory(proposal.content, proposal.title);
+  }, [proposal.id, initializeHistory]);
 
   // Update local state when proposal prop changes
   useEffect(() => {
@@ -27,15 +51,34 @@ const EditorContainer: React.FC<EditorContainerProps> = ({ proposal }) => {
     setLastSaved(new Date(proposal.lastModified));
   }, [proposal]);
 
+  // Add state to history when content or title changes
+  useEffect(() => {
+    if (content !== proposal.content || title !== proposal.title) {
+      addState(content, title);
+    }
+  }, [content, title, addState, proposal.content, proposal.title]);
+
   const handleSave = async () => {
+    if (!user) return;
+
     setIsSaving(true);
     setSaveError(null);
     
     try {
+      // Update the main proposal
       await proposalService.updateProposal(proposal.id, {
         title,
         content
       });
+
+      // Save version to history
+      await proposalService.saveProposalVersion(
+        proposal.id,
+        content,
+        title,
+        user.id
+      );
+
       setLastSaved(new Date());
     } catch (error) {
       console.error('Error saving proposal:', error);
@@ -61,6 +104,47 @@ const EditorContainer: React.FC<EditorContainerProps> = ({ proposal }) => {
     }
   };
 
+  const handleUndo = useCallback(() => {
+    undo();
+    const state = getCurrentState();
+    if (state) {
+      setContent(state.content);
+      setTitle(state.title);
+    }
+  }, [undo, getCurrentState]);
+
+  const handleRedo = useCallback(() => {
+    redo();
+    const state = getCurrentState();
+    if (state) {
+      setContent(state.content);
+      setTitle(state.title);
+    }
+  }, [redo, getCurrentState]);
+
+  const handleRestoreVersion = async (versionId: string) => {
+    if (!user) return;
+
+    try {
+      const restoredProposal = await proposalService.restoreProposalVersion(
+        proposal.id,
+        versionId,
+        user.id
+      );
+
+      // Update local state with restored content
+      setContent(restoredProposal.content);
+      setTitle(restoredProposal.title);
+      setLastSaved(new Date());
+
+      // Add restored state to history
+      addState(restoredProposal.content, restoredProposal.title);
+    } catch (error) {
+      console.error('Error restoring version:', error);
+      setSaveError('Failed to restore version');
+    }
+  };
+
   return (
     <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
       {/* Header with title and controls */}
@@ -77,7 +161,11 @@ const EditorContainer: React.FC<EditorContainerProps> = ({ proposal }) => {
           </div>
           
           <div className="flex items-center space-x-4">
-            <AutosaveIndicator lastSaved={lastSaved} isSaving={isSaving} />
+            <AutosaveIndicator 
+              lastSaved={lastSaved} 
+              isSaving={isSaving} 
+              error={saveError}
+            />
             <ExportControls />
           </div>
         </div>
@@ -90,13 +178,28 @@ const EditorContainer: React.FC<EditorContainerProps> = ({ proposal }) => {
       </div>
 
       {/* Toolbar */}
-      <ToolbarSection onSave={handleSave} />
+      <ToolbarSection 
+        onSave={handleSave}
+        onUndo={handleUndo}
+        onRedo={handleRedo}
+        canUndo={canUndo}
+        canRedo={canRedo}
+        onShowVersionHistory={() => setShowVersionHistory(true)}
+      />
 
       {/* Content area */}
       <ContentArea 
         content={content} 
         onChange={handleContentChange}
         proposal={proposal}
+      />
+
+      {/* Version History Modal */}
+      <VersionHistoryModal
+        proposalId={proposal.id}
+        isOpen={showVersionHistory}
+        onClose={() => setShowVersionHistory(false)}
+        onRestore={handleRestoreVersion}
       />
     </div>
   );

@@ -63,6 +63,16 @@ export interface Proposal {
   documents: Document[];
 }
 
+export interface ProposalVersion {
+  id: string;
+  proposalId: string;
+  content: string;
+  title: string;
+  versionNumber: number;
+  createdAt: Date;
+  createdBy: string;
+}
+
 export interface Attestation {
   id: string;
   type: 'completion' | 'quality' | 'compliance' | 'reputation';
@@ -73,4 +83,17 @@ export interface Attestation {
   date: Date;
   blockchainTxId: string;
   verified: boolean;
+}
+
+// Editor history types for undo/redo functionality
+export interface EditorHistoryState {
+  content: string;
+  title: string;
+  timestamp: Date;
+}
+
+export interface EditorHistory {
+  states: EditorHistoryState[];
+  currentIndex: number;
+  maxStates: number;
 }
