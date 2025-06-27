@@ -31,7 +31,11 @@ export const companyService = {
       .eq('user_id', userId)
       .maybeSingle()
 
-    if (error) throw error
+    // Only throw error if it's a real error, not when no company is found
+    if (error && error.code !== 'PGRST116') {
+      throw error
+    }
+    
     return data
   },
 
