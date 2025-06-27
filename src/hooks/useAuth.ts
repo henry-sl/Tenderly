@@ -45,10 +45,11 @@ export function useAuth() {
     return { error }
   }
 
-  const updateEmail = async (newEmail: string, password: string) => {
+  const updateEmail = async (newEmail: string, currentPassword?: string) => {
+    // Only send the email parameter to Supabase
+    // Supabase handles email change verification through its own flow
     const { data, error } = await supabase.auth.updateUser({
       email: newEmail,
-      password: password,
     })
 
     return { data, error }

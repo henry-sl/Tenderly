@@ -48,8 +48,8 @@ const ContactUpdate: React.FC = () => {
     // Trim whitespace from email to prevent validation issues
     const trimmedEmail = emailChangeData.newEmail.trim();
 
-    if (!trimmedEmail || !emailChangeData.currentPassword) {
-      setEmailChangeMessage({ type: 'error', text: 'Please fill in all fields' });
+    if (!trimmedEmail) {
+      setEmailChangeMessage({ type: 'error', text: 'Please enter a new email address' });
       setEmailChangeLoading(false);
       return;
     }
@@ -71,7 +71,8 @@ const ContactUpdate: React.FC = () => {
     }
 
     try {
-      const { error } = await updateEmail(trimmedEmail, emailChangeData.currentPassword);
+      // Call updateEmail with only the new email address
+      const { error } = await updateEmail(trimmedEmail);
       
       if (error) {
         setEmailChangeMessage({ type: 'error', text: error.message });
@@ -149,21 +150,10 @@ const ContactUpdate: React.FC = () => {
             </p>
           </div>
           
-          <div>
-            <label htmlFor="currentPassword" className="block text-sm font-medium text-gray-700 mb-2">
-              Current Password
-            </label>
-            <input
-              type="password"
-              id="currentPassword"
-              value={emailChangeData.currentPassword}
-              onChange={(e) => setEmailChangeData(prev => ({ ...prev, currentPassword: e.target.value }))}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="Enter current password"
-              required
-            />
-            <p className="mt-1 text-xs text-gray-500">
-              Required for security verification
+          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+            <p className="text-sm text-yellow-700">
+              <strong>Note:</strong> Supabase will send confirmation emails to both your current and new email addresses. 
+              You'll need to confirm the change from both emails to complete the update.
             </p>
           </div>
           
