@@ -39,20 +39,23 @@ const ContactUpdate: React.FC = () => {
     setEmailChangeLoading(true);
     setEmailChangeMessage(null);
 
-    if (!emailChangeData.newEmail || !emailChangeData.currentPassword) {
+    // Trim whitespace from email to prevent validation issues
+    const trimmedEmail = emailChangeData.newEmail.trim();
+
+    if (!trimmedEmail || !emailChangeData.currentPassword) {
       setEmailChangeMessage({ type: 'error', text: 'Please fill in all fields' });
       setEmailChangeLoading(false);
       return;
     }
 
-    if (emailChangeData.newEmail === user?.email) {
+    if (trimmedEmail === user?.email) {
       setEmailChangeMessage({ type: 'error', text: 'New email must be different from current email' });
       setEmailChangeLoading(false);
       return;
     }
 
     try {
-      const { error } = await updateEmail(emailChangeData.newEmail, emailChangeData.currentPassword);
+      const { error } = await updateEmail(trimmedEmail, emailChangeData.currentPassword);
       
       if (error) {
         setEmailChangeMessage({ type: 'error', text: error.message });
@@ -120,7 +123,7 @@ const ContactUpdate: React.FC = () => {
               type="email"
               id="newEmail"
               value={emailChangeData.newEmail}
-              onChange={(e) => setEmailChangeData(prev => ({ ...prev, newEmail: e.target.value }))}
+              onChange={(e) => setEmailChangeData(prev => ({ ...prev, newEmail: e.target.value.trim() }))}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               placeholder="Enter new email address"
               required
