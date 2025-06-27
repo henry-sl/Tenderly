@@ -34,6 +34,12 @@ const ContactUpdate: React.FC = () => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
+  // Email validation function
+  const validateEmail = (email: string): boolean => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
   const handleChangeEmail = async (e: React.FormEvent) => {
     e.preventDefault();
     setEmailChangeLoading(true);
@@ -44,6 +50,16 @@ const ContactUpdate: React.FC = () => {
 
     if (!trimmedEmail || !emailChangeData.currentPassword) {
       setEmailChangeMessage({ type: 'error', text: 'Please fill in all fields' });
+      setEmailChangeLoading(false);
+      return;
+    }
+
+    // Client-side email validation
+    if (!validateEmail(trimmedEmail)) {
+      setEmailChangeMessage({ 
+        type: 'error', 
+        text: 'Please enter a valid email address (e.g., user@example.com)' 
+      });
       setEmailChangeLoading(false);
       return;
     }
@@ -125,9 +141,12 @@ const ContactUpdate: React.FC = () => {
               value={emailChangeData.newEmail}
               onChange={(e) => setEmailChangeData(prev => ({ ...prev, newEmail: e.target.value.trim() }))}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="Enter new email address"
+              placeholder="Enter new email address (e.g., user@example.com)"
               required
             />
+            <p className="mt-1 text-xs text-gray-500">
+              Must be a valid email format (e.g., user@example.com)
+            </p>
           </div>
           
           <div>
