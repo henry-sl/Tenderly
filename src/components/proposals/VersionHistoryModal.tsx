@@ -83,6 +83,9 @@ const VersionHistoryModal: React.FC<VersionHistoryModalProps> = ({
     return plainText.length > 150 ? plainText.substring(0, 150) + '...' : plainText;
   };
 
+  // Find the latest version (highest version number)
+  const latestVersionNumber = versions.length > 0 ? Math.max(...versions.map(v => v.versionNumber)) : 0;
+
   if (!isOpen) return null;
 
   return (
@@ -134,7 +137,7 @@ const VersionHistoryModal: React.FC<VersionHistoryModalProps> = ({
 
           {!loading && !error && versions.length > 0 && (
             <div className="space-y-4">
-              {versions.map((version, index) => (
+              {versions.map((version) => (
                 <div
                   key={version.id}
                   className="border border-gray-200 rounded-lg p-6 hover:border-gray-300 transition-colors"
@@ -145,9 +148,14 @@ const VersionHistoryModal: React.FC<VersionHistoryModalProps> = ({
                         <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                           Version {version.versionNumber}
                         </span>
-                        {index === 0 && (
+                        {version.versionNumber === latestVersionNumber && (
                           <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                            Latest
+                            Latest (Version {version.versionNumber})
+                          </span>
+                        )}
+                        {version.versionNumber === 1 && (
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                            Original
                           </span>
                         )}
                       </div>
@@ -173,7 +181,7 @@ const VersionHistoryModal: React.FC<VersionHistoryModalProps> = ({
                     </div>
                     
                     <div className="ml-4 flex-shrink-0">
-                      {index !== 0 && (
+                      {version.versionNumber !== latestVersionNumber && (
                         <button
                           onClick={() => handleRestore(version.id)}
                           disabled={restoringVersionId === version.id}
@@ -191,6 +199,11 @@ const VersionHistoryModal: React.FC<VersionHistoryModalProps> = ({
                             </>
                           )}
                         </button>
+                      )}
+                      {version.versionNumber === latestVersionNumber && (
+                        <span className="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-500 bg-gray-100 rounded-lg">
+                          Current Version
+                        </span>
                       )}
                     </div>
                   </div>
