@@ -46,7 +46,7 @@ export const proposalService = {
         )
       `)
       .eq('id', id)
-      .single()
+      .maybeSingle()
 
     if (error) throw error
     return data
