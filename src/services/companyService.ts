@@ -29,9 +29,9 @@ export const companyService = {
         )
       `)
       .eq('user_id', userId)
-      .single()
+      .maybeSingle()
 
-    if (error && error.code !== 'PGRST116') throw error
+    if (error) throw error
     return data
   },
 
