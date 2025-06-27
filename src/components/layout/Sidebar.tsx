@@ -21,7 +21,7 @@ const Sidebar: React.FC = () => {
   const menuItems = [
     { icon: FileText, label: 'Tenders', path: '/tenders' },
     { icon: User, label: 'Profile', path: '/profile' },
-    { icon: Edit3, label: 'Proposals', path: '/proposals/edit/1' },
+    { icon: Edit3, label: 'Proposals', path: '/proposals/edit/550e8400-e29b-41d4-a716-446655440200' },
     { icon: Star, label: 'Reputation', path: '/reputation' },
     { icon: HelpCircle, label: 'Help', path: '/help' },
     { icon: Settings, label: 'Settings', path: '/settings' },

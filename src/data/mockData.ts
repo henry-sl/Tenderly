@@ -2,7 +2,7 @@ import { Tender, Company, Proposal, Attestation } from '../types';
 
 export const mockTenders: Tender[] = [
   {
-    id: '1',
+    id: '550e8400-e29b-41d4-a716-446655440001',
     title: 'Smart City Infrastructure Development',
     description: 'Comprehensive smart city infrastructure project including IoT sensors, traffic management systems, and digital citizen services platform. The project aims to modernize urban infrastructure and improve quality of life for residents.',
     organization: 'City of San Francisco',
@@ -15,7 +15,7 @@ export const mockTenders: Tender[] = [
     bidCount: 23,
     documents: [
       {
-        id: '1',
+        id: '550e8400-e29b-41d4-a716-446655440010',
         name: 'Technical Specifications.pdf',
         type: 'application/pdf',
         size: 2456789,
@@ -36,7 +36,7 @@ export const mockTenders: Tender[] = [
     }
   },
   {
-    id: '2',
+    id: '550e8400-e29b-41d4-a716-446655440002',
     title: 'Hospital Management System Upgrade',
     description: 'Complete overhaul of existing hospital management system including patient records, appointment scheduling, billing, and integration with medical devices.',
     organization: 'Regional Medical Center',
@@ -60,7 +60,7 @@ export const mockTenders: Tender[] = [
     }
   },
   {
-    id: '3',
+    id: '550e8400-e29b-41d4-a716-446655440003',
     title: 'Renewable Energy Consulting Services',
     description: 'Strategic consulting for transitioning municipal energy systems to renewable sources. Includes feasibility studies, implementation planning, and ROI analysis.',
     organization: 'Green Valley Municipality',
@@ -84,7 +84,7 @@ export const mockTenders: Tender[] = [
     }
   },
   {
-    id: '4',
+    id: '550e8400-e29b-41d4-a716-446655440004',
     title: 'Educational Technology Platform',
     description: 'Development of comprehensive e-learning platform for K-12 education with interactive content, assessment tools, and parent/teacher dashboards.',
     organization: 'State Department of Education',
@@ -111,7 +111,7 @@ export const mockTenders: Tender[] = [
 ];
 
 export const mockCompany: Company = {
-  id: '1',
+  id: '550e8400-e29b-41d4-a716-446655440100',
   name: 'TechSolutions Ltd',
   registrationNumber: 'TS-2019-001234',
   address: '123 Innovation Street, Tech District, San Francisco, CA 94105',
@@ -123,7 +123,7 @@ export const mockCompany: Company = {
   established: new Date('2019-03-15'),
   certifications: [
     {
-      id: '1',
+      id: '550e8400-e29b-41d4-a716-446655440110',
       name: 'ISO 27001:2013',
       issuedBy: 'BSI Group',
       issueDate: new Date('2023-06-01'),
@@ -131,7 +131,7 @@ export const mockCompany: Company = {
       documentUrl: '/certificates/iso27001.pdf'
     },
     {
-      id: '2',
+      id: '550e8400-e29b-41d4-a716-446655440111',
       name: 'SOC 2 Type II',
       issuedBy: 'AICPA',
       issueDate: new Date('2024-01-15'),
@@ -144,8 +144,8 @@ export const mockCompany: Company = {
 
 export const mockProposals: Proposal[] = [
   {
-    id: '1',
-    tenderId: '1',
+    id: '550e8400-e29b-41d4-a716-446655440200',
+    tenderId: '550e8400-e29b-41d4-a716-446655440001',
     title: 'Smart City Infrastructure Proposal',
     content: 'Our comprehensive proposal for the Smart City Infrastructure Development project...',
     status: 'draft',
@@ -156,7 +156,7 @@ export const mockProposals: Proposal[] = [
 
 export const mockAttestations: Attestation[] = [
   {
-    id: '1',
+    id: '550e8400-e29b-41d4-a716-446655440300',
     type: 'completion',
     issuer: 'City of Los Angeles',
     recipient: 'TechSolutions Ltd',
@@ -167,7 +167,7 @@ export const mockAttestations: Attestation[] = [
     verified: true
   },
   {
-    id: '2',
+    id: '550e8400-e29b-41d4-a716-446655440301',
     type: 'quality',
     issuer: 'State of California',
     recipient: 'TechSolutions Ltd',
@@ -178,7 +178,7 @@ export const mockAttestations: Attestation[] = [
     verified: true
   },
   {
-    id: '3',
+    id: '550e8400-e29b-41d4-a716-446655440302',
     type: 'compliance',
     issuer: 'Federal Compliance Authority',
     recipient: 'TechSolutions Ltd',
