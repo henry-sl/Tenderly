@@ -37,6 +37,14 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ company, onUpdateCompany 
     setSaveError(null);
   };
 
+  // Handle phone number input to only allow digits
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    // Remove all non-digit characters
+    const digitsOnly = value.replace(/\D/g, '');
+    setEditedCompany({...editedCompany, phone: digitsOnly});
+  };
+
   const getComplianceStatus = () => {
     const activeCerts = company.certifications.filter(cert => 
       !cert.expiryDate || cert.expiryDate > new Date()
@@ -194,26 +202,28 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ company, onUpdateCompany 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
-              {isEditing ? (
-                <input
-                  type="email"
-                  value={editedCompany.email}
-                  onChange={(e) => setEditedCompany({...editedCompany, email: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              ) : (
-                <p className="text-gray-900">{company.email}</p>
-              )}
+              <input
+                type="email"
+                value={company.email}
+                disabled={true}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-500 cursor-not-allowed"
+              />
+              <p className="mt-1 text-xs text-gray-500">
+                Email address can only be changed in Settings
+              </p>
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Phone</label>
               {isEditing ? (
                 <input
-                  type="tel"
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
                   value={editedCompany.phone}
-                  onChange={(e) => setEditedCompany({...editedCompany, phone: e.target.value})}
+                  onChange={handlePhoneChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="Enter phone number (digits only)"
                 />
               ) : (
                 <p className="text-gray-900">{company.phone}</p>
