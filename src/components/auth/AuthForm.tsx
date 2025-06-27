@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { Mail, Lock, Building, AlertCircle } from 'lucide-react'
 import { useAuth } from '../../hooks/useAuth'
+import { companyService } from '../../services/companyService'
 
 interface AuthFormProps {
   onSuccess?: () => void
@@ -36,6 +37,38 @@ export const AuthForm: React.FC<AuthFormProps> = ({ onSuccess }) => {
     return true
   }
 
+  const createDefaultCompany = async (userId: string, userEmail: string) => {
+    try {
+      // Generate a unique registration number based on timestamp
+      const registrationNumber = `REG-${Date.now()}`
+      
+      // Extract company name from email domain (fallback to "New Company")
+      const emailDomain = userEmail.split('@')[1]
+      const companyName = emailDomain ? 
+        emailDomain.split('.')[0].charAt(0).toUpperCase() + emailDomain.split('.')[0].slice(1) + ' Company' : 
+        'New Company'
+
+      const defaultCompany = {
+        user_id: userId,
+        name: companyName,
+        registration_number: registrationNumber,
+        address: 'Please update your company address',
+        phone: 'Please update your phone number',
+        email: userEmail,
+        website: null,
+        industry: 'Technology', // Default industry
+        employees: 1,
+        established: new Date().toISOString().split('T')[0] // Today's date as string
+      }
+
+      await companyService.createCompany(defaultCompany)
+    } catch (error) {
+      console.error('Failed to create company record:', error)
+      // Don't throw error here as user account was created successfully
+      // They can create/update company info later
+    }
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
@@ -49,10 +82,13 @@ export const AuthForm: React.FC<AuthFormProps> = ({ onSuccess }) => {
 
     try {
       if (isSignUp) {
-        const { error } = await signUp(email, password)
+        const { data, error } = await signUp(email, password)
         if (error) {
           setError(error.message)
-        } else {
+        } else if (data.user) {
+          // Create default company record for the new user
+          await createDefaultCompany(data.user.id, email)
+          
           setSuccess('Account created successfully! Please check your email to verify your account.')
           setEmail('')
           setPassword('')
@@ -175,6 +211,15 @@ export const AuthForm: React.FC<AuthFormProps> = ({ onSuccess }) => {
               )}
             </div>
 
+            {isSignUp && (
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <p className="text-sm text-blue-700">
+                  <strong>Note:</strong> A default company profile will be created for you. 
+                  You can update your company details after signing in.
+                </p>
+              </div>
+            )}
+
             <div>
               <button
                 type="submit"
@@ -184,7 +229,7 @@ export const AuthForm: React.FC<AuthFormProps> = ({ onSuccess }) => {
                 {loading ? (
                   <div className="flex items-center">
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                    Please wait...
+                    {isSignUp ? 'Creating account...' : 'Signing in...'}
                   </div>
                 ) : (
                   isSignUp ? 'Create account' : 'Sign in'
