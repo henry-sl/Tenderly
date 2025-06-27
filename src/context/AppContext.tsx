@@ -1,13 +1,5 @@
 import React, { createContext, useContext, useReducer, ReactNode } from 'react';
 
-interface User {
-  id: string;
-  name: string;
-  company: string;
-  email: string;
-  avatar?: string;
-}
-
 interface Notification {
   id: string;
   message: string;
@@ -17,27 +9,18 @@ interface Notification {
 }
 
 interface AppState {
-  user: User | null;
   notifications: Notification[];
   sidebarCollapsed: boolean;
   theme: 'light' | 'dark';
 }
 
 type AppAction =
-  | { type: 'SET_USER'; payload: User }
   | { type: 'ADD_NOTIFICATION'; payload: Notification }
   | { type: 'MARK_NOTIFICATION_READ'; payload: string }
   | { type: 'TOGGLE_SIDEBAR' }
   | { type: 'SET_THEME'; payload: 'light' | 'dark' };
 
 const initialState: AppState = {
-  user: {
-    id: '1',
-    name: 'Sarah Chen',
-    company: 'TechSolutions Ltd',
-    email: 'sarah.chen@techsolutions.com',
-    avatar: 'https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=150'
-  },
   notifications: [
     {
       id: '1',
@@ -60,8 +43,6 @@ const initialState: AppState = {
 
 const appReducer = (state: AppState, action: AppAction): AppState => {
   switch (action.type) {
-    case 'SET_USER':
-      return { ...state, user: action.payload };
     case 'ADD_NOTIFICATION':
       return { 
         ...state, 
@@ -106,4 +87,4 @@ export const useAppContext = () => {
   return context;
 };
 
-export type { User, Notification, AppState, AppAction };
+export type { Notification, AppState, AppAction };

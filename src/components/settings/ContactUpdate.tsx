@@ -1,24 +1,32 @@
 import React, { useState } from 'react';
-import { User, Mail, Phone, MapPin, Save } from 'lucide-react';
-import { useAppContext } from '../../context/AppContext';
+import { User, Mail, Phone, MapPin, Save, AlertCircle, CheckCircle } from 'lucide-react';
+import { useAuth } from '../../hooks/useAuth';
 
 /**
  * Contact information update component
  */
 const ContactUpdate: React.FC = () => {
-  const { state } = useAppContext();
+  const { user, updateEmail } = useAuth();
   const [formData, setFormData] = useState({
-    name: state.user?.name || '',
-    email: state.user?.email || '',
+    name: user?.email?.split('@')[0] || '',
+    email: user?.email || '',
     phone: '+1-415-555-9876',
     address: '123 Innovation Street, Tech District, San Francisco, CA 94105',
     website: 'https://techsolutions.com',
     linkedIn: 'https://linkedin.com/company/techsolutions'
   });
 
+  // Email change specific state
+  const [emailChangeData, setEmailChangeData] = useState({
+    newEmail: '',
+    currentPassword: ''
+  });
+  const [emailChangeLoading, setEmailChangeLoading] = useState(false);
+  const [emailChangeMessage, setEmailChangeMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle form submission
+    // Handle form submission for general contact info
     console.log('Contact info updated:', formData);
   };
 
@@ -26,13 +34,135 @@ const ContactUpdate: React.FC = () => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
+  const handleChangeEmail = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setEmailChangeLoading(true);
+    setEmailChangeMessage(null);
+
+    if (!emailChangeData.newEmail || !emailChangeData.currentPassword) {
+      setEmailChangeMessage({ type: 'error', text: 'Please fill in all fields' });
+      setEmailChangeLoading(false);
+      return;
+    }
+
+    if (emailChangeData.newEmail === user?.email) {
+      setEmailChangeMessage({ type: 'error', text: 'New email must be different from current email' });
+      setEmailChangeLoading(false);
+      return;
+    }
+
+    try {
+      const { error } = await updateEmail(emailChangeData.newEmail, emailChangeData.currentPassword);
+      
+      if (error) {
+        setEmailChangeMessage({ type: 'error', text: error.message });
+      } else {
+        setEmailChangeMessage({ 
+          type: 'success', 
+          text: 'Email update initiated. Please check both your old and new email addresses for confirmation links.' 
+        });
+        setEmailChangeData({ newEmail: '', currentPassword: '' });
+      }
+    } catch (error) {
+      setEmailChangeMessage({ type: 'error', text: 'An unexpected error occurred' });
+    } finally {
+      setEmailChangeLoading(false);
+    }
+  };
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div>
         <h3 className="text-lg font-semibold text-gray-900 mb-4">Contact Information</h3>
         <p className="text-gray-600 mb-6">
           Update your contact details and ensure your information is current.
         </p>
+      </div>
+
+      {/* Email Change Section */}
+      <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
+        <h4 className="text-md font-medium text-gray-900 mb-4 flex items-center">
+          <Mail className="h-4 w-4 mr-2" />
+          Change Email Address
+        </h4>
+        
+        <div className="mb-4">
+          <p className="text-sm text-gray-600">
+            Current email: <span className="font-medium">{user?.email}</span>
+          </p>
+        </div>
+
+        {emailChangeMessage && (
+          <div className={`mb-4 p-3 rounded-lg flex items-start ${
+            emailChangeMessage.type === 'success' 
+              ? 'bg-green-50 border border-green-200' 
+              : 'bg-red-50 border border-red-200'
+          }`}>
+            {emailChangeMessage.type === 'success' ? (
+              <CheckCircle className="h-5 w-5 text-green-400 mt-0.5 mr-3 flex-shrink-0" />
+            ) : (
+              <AlertCircle className="h-5 w-5 text-red-400 mt-0.5 mr-3 flex-shrink-0" />
+            )}
+            <p className={`text-sm ${
+              emailChangeMessage.type === 'success' ? 'text-green-600' : 'text-red-600'
+            }`}>
+              {emailChangeMessage.text}
+            </p>
+          </div>
+        )}
+
+        <form onSubmit={handleChangeEmail} className="space-y-4">
+          <div>
+            <label htmlFor="newEmail" className="block text-sm font-medium text-gray-700 mb-2">
+              New Email Address
+            </label>
+            <input
+              type="email"
+              id="newEmail"
+              value={emailChangeData.newEmail}
+              onChange={(e) => setEmailChangeData(prev => ({ ...prev, newEmail: e.target.value }))}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="Enter new email address"
+              required
+            />
+          </div>
+          
+          <div>
+            <label htmlFor="currentPassword" className="block text-sm font-medium text-gray-700 mb-2">
+              Current Password
+            </label>
+            <input
+              type="password"
+              id="currentPassword"
+              value={emailChangeData.currentPassword}
+              onChange={(e) => setEmailChangeData(prev => ({ ...prev, currentPassword: e.target.value }))}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="Enter current password"
+              required
+            />
+            <p className="mt-1 text-xs text-gray-500">
+              Required for security verification
+            </p>
+          </div>
+          
+          <button
+            type="submit"
+            disabled={emailChangeLoading}
+            className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {emailChangeLoading ? (
+              <>
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                Updating...
+              </>
+            ) : (
+              <>
+                <Save className="h-4 w-4 mr-2" />
+                Update Email
+              </>
+            )}
+          </button>
+        </form>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
@@ -59,17 +189,19 @@ const ContactUpdate: React.FC = () => {
             </div>
             
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                Email Address
+              <label htmlFor="displayEmail" className="block text-sm font-medium text-gray-700 mb-2">
+                Email Address (Display)
               </label>
               <input
                 type="email"
-                id="email"
-                value={formData.email}
-                onChange={(e) => handleChange('email', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                required
+                id="displayEmail"
+                value={user?.email || ''}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-500"
+                disabled
               />
+              <p className="mt-1 text-xs text-gray-500">
+                Use the "Change Email Address" section above to update your email
+              </p>
             </div>
           </div>
         </div>

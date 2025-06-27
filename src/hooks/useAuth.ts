@@ -45,11 +45,40 @@ export function useAuth() {
     return { error }
   }
 
+  const updateEmail = async (newEmail: string, password: string) => {
+    // First verify the current password by attempting to sign in
+    const { error: verifyError } = await supabase.auth.signInWithPassword({
+      email: user?.email || '',
+      password,
+    })
+
+    if (verifyError) {
+      return { error: { message: 'Current password is incorrect' } }
+    }
+
+    // If password is correct, update the email
+    const { data, error } = await supabase.auth.updateUser({
+      email: newEmail,
+    })
+
+    return { data, error }
+  }
+
+  const updatePassword = async (newPassword: string) => {
+    const { data, error } = await supabase.auth.updateUser({
+      password: newPassword,
+    })
+
+    return { data, error }
+  }
+
   return {
     user,
     loading,
     signUp,
     signIn,
     signOut,
+    updateEmail,
+    updatePassword,
   }
 }

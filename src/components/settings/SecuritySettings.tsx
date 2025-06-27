@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
-import { Shield, Key, Smartphone, AlertTriangle, Save } from 'lucide-react';
+import { Shield, Key, Smartphone, AlertTriangle, Save, CheckCircle } from 'lucide-react';
+import { useAuth } from '../../hooks/useAuth';
 
 /**
  * Security settings component for password and 2FA management
  */
 const SecuritySettings: React.FC = () => {
+  const { updatePassword } = useAuth();
   const [passwordForm, setPasswordForm] = useState({
     currentPassword: '',
     newPassword: '',
@@ -13,13 +15,57 @@ const SecuritySettings: React.FC = () => {
   
   const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
   const [showPasswordForm, setShowPasswordForm] = useState(false);
+  const [passwordChangeLoading, setPasswordChangeLoading] = useState(false);
+  const [passwordChangeMessage, setPasswordChangeMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
 
-  const handlePasswordChange = (e: React.FormEvent) => {
+  const handlePasswordChange = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle password change
-    console.log('Password change requested');
-    setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
-    setShowPasswordForm(false);
+    setPasswordChangeLoading(true);
+    setPasswordChangeMessage(null);
+
+    // Validation
+    if (!passwordForm.currentPassword || !passwordForm.newPassword || !passwordForm.confirmPassword) {
+      setPasswordChangeMessage({ type: 'error', text: 'Please fill in all fields' });
+      setPasswordChangeLoading(false);
+      return;
+    }
+
+    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+      setPasswordChangeMessage({ type: 'error', text: 'New passwords do not match' });
+      setPasswordChangeLoading(false);
+      return;
+    }
+
+    if (passwordForm.newPassword.length < 6) {
+      setPasswordChangeMessage({ type: 'error', text: 'New password must be at least 6 characters long' });
+      setPasswordChangeLoading(false);
+      return;
+    }
+
+    if (passwordForm.currentPassword === passwordForm.newPassword) {
+      setPasswordChangeMessage({ type: 'error', text: 'New password must be different from current password' });
+      setPasswordChangeLoading(false);
+      return;
+    }
+
+    try {
+      const { error } = await updatePassword(passwordForm.newPassword);
+      
+      if (error) {
+        setPasswordChangeMessage({ type: 'error', text: error.message });
+      } else {
+        setPasswordChangeMessage({ 
+          type: 'success', 
+          text: 'Password updated successfully!' 
+        });
+        setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
+        setShowPasswordForm(false);
+      }
+    } catch (error) {
+      setPasswordChangeMessage({ type: 'error', text: 'An unexpected error occurred' });
+    } finally {
+      setPasswordChangeLoading(false);
+    }
   };
 
   const handleTwoFactorToggle = () => {
@@ -46,6 +92,25 @@ const SecuritySettings: React.FC = () => {
         <p className="text-gray-600 mb-4">
           Last changed: December 15, 2024
         </p>
+
+        {passwordChangeMessage && (
+          <div className={`mb-4 p-3 rounded-lg flex items-start ${
+            passwordChangeMessage.type === 'success' 
+              ? 'bg-green-50 border border-green-200' 
+              : 'bg-red-50 border border-red-200'
+          }`}>
+            {passwordChangeMessage.type === 'success' ? (
+              <CheckCircle className="h-5 w-5 text-green-400 mt-0.5 mr-3 flex-shrink-0" />
+            ) : (
+              <AlertTriangle className="h-5 w-5 text-red-400 mt-0.5 mr-3 flex-shrink-0" />
+            )}
+            <p className={`text-sm ${
+              passwordChangeMessage.type === 'success' ? 'text-green-600' : 'text-red-600'
+            }`}>
+              {passwordChangeMessage.text}
+            </p>
+          </div>
+        )}
         
         {!showPasswordForm ? (
           <button
@@ -82,6 +147,9 @@ const SecuritySettings: React.FC = () => {
                 className="w-full max-w-md px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 required
               />
+              <p className="mt-1 text-xs text-gray-500">
+                Must be at least 6 characters long
+              </p>
             </div>
             
             <div>
@@ -101,14 +169,28 @@ const SecuritySettings: React.FC = () => {
             <div className="flex items-center space-x-3">
               <button
                 type="submit"
-                className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                disabled={passwordChangeLoading}
+                className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <Save className="h-4 w-4 mr-2" />
-                Update Password
+                {passwordChangeLoading ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    Updating...
+                  </>
+                ) : (
+                  <>
+                    <Save className="h-4 w-4 mr-2" />
+                    Update Password
+                  </>
+                )}
               </button>
               <button
                 type="button"
-                onClick={() => setShowPasswordForm(false)}
+                onClick={() => {
+                  setShowPasswordForm(false);
+                  setPasswordChangeMessage(null);
+                  setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
+                }}
                 className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
               >
                 Cancel
