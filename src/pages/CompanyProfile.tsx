@@ -66,6 +66,48 @@ const CompanyProfile: React.FC = () => {
     fetchCompany();
   }, [user]);
 
+  const handleUpdateCompany = async (updatedCompany: Company): Promise<void> => {
+    try {
+      // Prepare the update data with only the fields that can be updated
+      const updateData = {
+        name: updatedCompany.name,
+        address: updatedCompany.address,
+        phone: updatedCompany.phone,
+        email: updatedCompany.email,
+        website: updatedCompany.website || null,
+        industry: updatedCompany.industry,
+        employees: updatedCompany.employees,
+        established: updatedCompany.established.toISOString().split('T')[0] // Convert to YYYY-MM-DD format
+      };
+
+      // Call the service to update the company in Supabase
+      const updatedData = await companyService.updateCompany(updatedCompany.id, updateData);
+
+      // Update the local state with the new data, preserving certifications and documents
+      setCompany(prevCompany => {
+        if (!prevCompany) return null;
+        
+        return {
+          ...prevCompany,
+          name: updatedData.name,
+          address: updatedData.address,
+          phone: updatedData.phone,
+          email: updatedData.email,
+          website: updatedData.website || undefined,
+          industry: updatedData.industry,
+          employees: updatedData.employees,
+          established: new Date(updatedData.established),
+          // Preserve existing certifications and documents
+          certifications: prevCompany.certifications,
+          documents: prevCompany.documents
+        };
+      });
+    } catch (error) {
+      console.error('Error updating company:', error);
+      throw new Error('Failed to update company information. Please try again.');
+    }
+  };
+
   if (loading) {
     return (
       <div className="max-w-4xl mx-auto">
@@ -114,7 +156,7 @@ const CompanyProfile: React.FC = () => {
         </p>
       </div>
 
-      <ProfileHeader company={company} />
+      <ProfileHeader company={company} onUpdateCompany={handleUpdateCompany} />
       <ProfileContent company={company} />
     </div>
   );

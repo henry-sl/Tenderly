@@ -1,26 +1,40 @@
 import React, { useState } from 'react';
-import { Building, Edit2, Save, X, CheckCircle, AlertCircle } from 'lucide-react';
+import { Building, Edit2, Save, X, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
 import { Company } from '../../types';
 
 interface ProfileHeaderProps {
   company: Company;
+  onUpdateCompany: (company: Company) => Promise<void>;
 }
 
 /**
  * Company profile header with key information and edit capabilities
  */
-const ProfileHeader: React.FC<ProfileHeaderProps> = ({ company }) => {
+const ProfileHeader: React.FC<ProfileHeaderProps> = ({ company, onUpdateCompany }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedCompany, setEditedCompany] = useState(company);
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
-  const handleSave = () => {
-    // In a real app, this would save to the backend
-    setIsEditing(false);
+  const handleSave = async () => {
+    setIsSaving(true);
+    setSaveError(null);
+
+    try {
+      await onUpdateCompany(editedCompany);
+      setIsEditing(false);
+    } catch (error) {
+      console.error('Error saving company:', error);
+      setSaveError(error instanceof Error ? error.message : 'Failed to save changes. Please try again.');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleCancel = () => {
     setEditedCompany(company);
     setIsEditing(false);
+    setSaveError(null);
   };
 
   const getComplianceStatus = () => {
@@ -58,6 +72,14 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ company }) => {
       </div>
 
       <div className="p-6">
+        {/* Save error message */}
+        {saveError && (
+          <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4 flex items-start">
+            <AlertCircle className="h-5 w-5 text-red-400 mt-0.5 mr-3 flex-shrink-0" />
+            <p className="text-sm text-red-600">{saveError}</p>
+          </div>
+        )}
+
         <div className="flex items-start justify-between mb-6">
           <div className="flex items-center space-x-4">
             <div className="p-3 bg-blue-100 rounded-xl">
@@ -83,14 +105,25 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ company }) => {
               <>
                 <button
                   onClick={handleSave}
-                  className="inline-flex items-center px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                  disabled={isSaving}
+                  className="inline-flex items-center px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <Save className="h-4 w-4 mr-2" />
-                  Save
+                  {isSaving ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Saving...
+                    </>
+                  ) : (
+                    <>
+                      <Save className="h-4 w-4 mr-2" />
+                      Save
+                    </>
+                  )}
                 </button>
                 <button
                   onClick={handleCancel}
-                  className="inline-flex items-center px-3 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+                  disabled={isSaving}
+                  className="inline-flex items-center px-3 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <X className="h-4 w-4 mr-2" />
                   Cancel
@@ -123,6 +156,11 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ company }) => {
                 <option value="Healthcare">Healthcare</option>
                 <option value="Education">Education</option>
                 <option value="Manufacturing">Manufacturing</option>
+                <option value="Energy">Energy</option>
+                <option value="Transportation">Transportation</option>
+                <option value="Consulting">Consulting</option>
+                <option value="Finance">Finance</option>
+                <option value="Retail">Retail</option>
               </select>
             ) : (
               <p className="text-gray-900">{company.industry}</p>
@@ -135,8 +173,9 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ company }) => {
               <input
                 type="number"
                 value={editedCompany.employees}
-                onChange={(e) => setEditedCompany({...editedCompany, employees: parseInt(e.target.value)})}
+                onChange={(e) => setEditedCompany({...editedCompany, employees: parseInt(e.target.value) || 0})}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                min="1"
               />
             ) : (
               <p className="text-gray-900">{company.employees} employees</p>
@@ -193,6 +232,21 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ company }) => {
               />
             ) : (
               <p className="text-gray-900">{company.address}</p>
+            )}
+          </div>
+
+          <div className="mt-4">
+            <label className="block text-sm font-medium text-gray-700 mb-2">Website</label>
+            {isEditing ? (
+              <input
+                type="url"
+                value={editedCompany.website || ''}
+                onChange={(e) => setEditedCompany({...editedCompany, website: e.target.value || undefined})}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="https://yourcompany.com"
+              />
+            ) : (
+              <p className="text-gray-900">{company.website || 'Not provided'}</p>
             )}
           </div>
         </div>
