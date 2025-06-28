@@ -85,9 +85,10 @@ const CompanyProfile: React.FC = () => {
 
   const handleUpdateCompany = async (updatedCompany: Company): Promise<void> => {
     try {
-      // Prepare the update data with only the fields that can be updated
+      // Prepare the update data with all editable fields
       const updateData = {
         name: updatedCompany.name,
+        registration_number: updatedCompany.registrationNumber,
         address: updatedCompany.address,
         phone: updatedCompany.phone,
         email: updatedCompany.email,
@@ -107,6 +108,7 @@ const CompanyProfile: React.FC = () => {
         return {
           ...prevCompany,
           name: updatedData.name,
+          registrationNumber: updatedData.registration_number,
           address: updatedData.address,
           phone: updatedData.phone,
           email: updatedData.email,

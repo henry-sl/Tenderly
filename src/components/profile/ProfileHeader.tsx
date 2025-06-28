@@ -37,12 +37,10 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ company, onUpdateCompany 
     setSaveError(null);
   };
 
-  // Handle phone number input to only allow digits
+  // Handle phone number input to allow various formats
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
-    // Remove all non-digit characters
-    const digitsOnly = value.replace(/\D/g, '');
-    setEditedCompany({...editedCompany, phone: digitsOnly});
+    setEditedCompany({...editedCompany, phone: value});
   };
 
   const getComplianceStatus = () => {
@@ -177,12 +175,31 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ company, onUpdateCompany 
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Registration Number</label>
-            <p className="text-gray-900">{company.registrationNumber}</p>
+            {isEditing ? (
+              <input
+                type="text"
+                value={editedCompany.registrationNumber}
+                onChange={(e) => setEditedCompany({...editedCompany, registrationNumber: e.target.value})}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="Enter registration number"
+              />
+            ) : (
+              <p className="text-gray-900">{company.registrationNumber}</p>
+            )}
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Established</label>
-            <p className="text-gray-900">{company.established.getFullYear()}</p>
+            {isEditing ? (
+              <input
+                type="date"
+                value={editedCompany.established.toISOString().split('T')[0]}
+                onChange={(e) => setEditedCompany({...editedCompany, established: new Date(e.target.value)})}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            ) : (
+              <p className="text-gray-900">{company.established.getFullYear()}</p>
+            )}
           </div>
         </div>
 
@@ -207,13 +224,11 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ company, onUpdateCompany 
               <label className="block text-sm font-medium text-gray-700 mb-2">Phone</label>
               {isEditing ? (
                 <input
-                  type="text"
-                  inputMode="numeric"
-                  pattern="[0-9]*"
+                  type="tel"
                   value={editedCompany.phone}
                   onChange={handlePhoneChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Enter phone number (digits only)"
+                  placeholder="Enter phone number"
                 />
               ) : (
                 <p className="text-gray-900">{company.phone}</p>
