@@ -4,7 +4,7 @@ import ProfileContent from '../components/profile/ProfileContent';
 import ProfileCompletionBar from '../components/profile/ProfileCompletionBar';
 import { useAuth } from '../hooks/useAuth';
 import { companyService } from '../services/companyService';
-import { Company, CertificationFormData } from '../types';
+import { Company, CertificationFormData, ExperienceFormData } from '../types';
 
 /**
  * Company profile page with editable sections and compliance tracking
@@ -51,6 +51,22 @@ const CompanyProfile: React.FC = () => {
               size: doc.size,
               url: doc.url,
               uploadDate: new Date(doc.upload_date)
+            })) || [],
+            experiences: companyData.experiences?.map(exp => ({
+              id: exp.id,
+              projectName: exp.project_name,
+              clientName: exp.client_name,
+              description: exp.description,
+              startDate: new Date(exp.start_date),
+              endDate: exp.end_date ? new Date(exp.end_date) : undefined,
+              projectValue: exp.project_value || undefined,
+              category: exp.category,
+              status: exp.status as 'completed' | 'ongoing' | 'cancelled',
+              location: exp.location,
+              keyAchievements: exp.key_achievements || [],
+              technologies: exp.technologies || undefined,
+              teamSize: exp.team_size || undefined,
+              role: exp.role
             })) || []
           };
           
@@ -84,7 +100,7 @@ const CompanyProfile: React.FC = () => {
       // Call the service to update the company in Supabase
       const updatedData = await companyService.updateCompany(updatedCompany.id, updateData);
 
-      // Update the local state with the new data, preserving certifications and documents
+      // Update the local state with the new data, preserving certifications, documents, and experiences
       setCompany(prevCompany => {
         if (!prevCompany) return null;
         
@@ -98,9 +114,10 @@ const CompanyProfile: React.FC = () => {
           industry: updatedData.industry,
           employees: updatedData.employees,
           established: new Date(updatedData.established),
-          // Preserve existing certifications and documents
+          // Preserve existing certifications, documents, and experiences
           certifications: prevCompany.certifications,
-          documents: prevCompany.documents
+          documents: prevCompany.documents,
+          experiences: prevCompany.experiences
         };
       });
     } catch (error) {
@@ -222,6 +239,132 @@ const CompanyProfile: React.FC = () => {
     }
   };
 
+  const handleAddExperience = async (formData: ExperienceFormData): Promise<void> => {
+    if (!company) return;
+
+    try {
+      const experienceData = {
+        company_id: company.id,
+        project_name: formData.projectName,
+        client_name: formData.clientName,
+        description: formData.description,
+        start_date: formData.startDate,
+        end_date: formData.endDate || null,
+        project_value: formData.projectValue || null,
+        category: formData.category,
+        status: formData.status,
+        location: formData.location,
+        key_achievements: formData.keyAchievements,
+        technologies: formData.technologies || null,
+        team_size: formData.teamSize || null,
+        role: formData.role
+      };
+
+      const newExperience = await companyService.addExperience(experienceData);
+
+      // Update local state
+      setCompany(prevCompany => {
+        if (!prevCompany) return null;
+        
+        const transformedExperience = {
+          id: newExperience.id,
+          projectName: newExperience.project_name,
+          clientName: newExperience.client_name,
+          description: newExperience.description,
+          startDate: new Date(newExperience.start_date),
+          endDate: newExperience.end_date ? new Date(newExperience.end_date) : undefined,
+          projectValue: newExperience.project_value || undefined,
+          category: newExperience.category,
+          status: newExperience.status as 'completed' | 'ongoing' | 'cancelled',
+          location: newExperience.location,
+          keyAchievements: newExperience.key_achievements || [],
+          technologies: newExperience.technologies || undefined,
+          teamSize: newExperience.team_size || undefined,
+          role: newExperience.role
+        };
+
+        return {
+          ...prevCompany,
+          experiences: [...prevCompany.experiences, transformedExperience]
+        };
+      });
+    } catch (error) {
+      console.error('Error adding experience:', error);
+      throw new Error('Failed to add experience. Please try again.');
+    }
+  };
+
+  const handleUpdateExperience = async (id: string, formData: ExperienceFormData): Promise<void> => {
+    try {
+      const updateData = {
+        project_name: formData.projectName,
+        client_name: formData.clientName,
+        description: formData.description,
+        start_date: formData.startDate,
+        end_date: formData.endDate || null,
+        project_value: formData.projectValue || null,
+        category: formData.category,
+        status: formData.status,
+        location: formData.location,
+        key_achievements: formData.keyAchievements,
+        technologies: formData.technologies || null,
+        team_size: formData.teamSize || null,
+        role: formData.role
+      };
+
+      const updatedExperience = await companyService.updateExperience(id, updateData);
+
+      // Update local state
+      setCompany(prevCompany => {
+        if (!prevCompany) return null;
+        
+        return {
+          ...prevCompany,
+          experiences: prevCompany.experiences.map(exp => 
+            exp.id === id ? {
+              id: updatedExperience.id,
+              projectName: updatedExperience.project_name,
+              clientName: updatedExperience.client_name,
+              description: updatedExperience.description,
+              startDate: new Date(updatedExperience.start_date),
+              endDate: updatedExperience.end_date ? new Date(updatedExperience.end_date) : undefined,
+              projectValue: updatedExperience.project_value || undefined,
+              category: updatedExperience.category,
+              status: updatedExperience.status as 'completed' | 'ongoing' | 'cancelled',
+              location: updatedExperience.location,
+              keyAchievements: updatedExperience.key_achievements || [],
+              technologies: updatedExperience.technologies || undefined,
+              teamSize: updatedExperience.team_size || undefined,
+              role: updatedExperience.role
+            } : exp
+          )
+        };
+      });
+    } catch (error) {
+      console.error('Error updating experience:', error);
+      throw new Error('Failed to update experience. Please try again.');
+    }
+  };
+
+  const handleDeleteExperience = async (id: string): Promise<void> => {
+    try {
+      await companyService.deleteExperience(id);
+
+      // Update local state
+      setCompany(prevCompany => {
+        if (!prevCompany) return null;
+        
+        return {
+          ...prevCompany,
+          experiences: prevCompany.experiences.filter(exp => exp.id !== id)
+        };
+      });
+    } catch (error) {
+      console.error('Error deleting experience:', error);
+      throw new Error('Failed to delete experience. Please try again.');
+    }
+  };
+
   if (loading) {
     return (
       <div className="max-w-4xl mx-auto">
@@ -267,7 +410,7 @@ const CompanyProfile: React.FC = () => {
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900">Company Profile</h1>
         <p className="mt-2 text-gray-600">
-          Manage your company information and compliance documents
+          Manage your company information and showcase your experience
         </p>
       </div>
 
@@ -279,6 +422,9 @@ const CompanyProfile: React.FC = () => {
         onDeleteCertification={handleDeleteCertification}
         onAddDocument={handleAddDocument}
         onDeleteDocument={handleDeleteDocument}
+        onAddExperience={handleAddExperience}
+        onUpdateExperience={handleUpdateExperience}
+        onDeleteExperience={handleDeleteExperience}
       />
     </div>
   );

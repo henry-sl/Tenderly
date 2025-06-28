@@ -26,6 +26,24 @@ export const companyService = {
           size,
           url,
           upload_date
+        ),
+        experiences (
+          id,
+          project_name,
+          client_name,
+          description,
+          start_date,
+          end_date,
+          project_value,
+          category,
+          status,
+          location,
+          key_achievements,
+          technologies,
+          team_size,
+          role,
+          created_at,
+          updated_at
         )
       `)
       .eq('user_id', userId)
@@ -209,6 +227,39 @@ export const companyService = {
     // Delete the database record
     const { error } = await supabase
       .from('documents')
+      .delete()
+      .eq('id', id)
+
+    if (error) throw error
+  },
+
+  // Experience methods
+  async addExperience(experience: Database['public']['Tables']['experiences']['Insert']) {
+    const { data, error } = await supabase
+      .from('experiences')
+      .insert(experience)
+      .select()
+      .single()
+
+    if (error) throw error
+    return data
+  },
+
+  async updateExperience(id: string, updates: Database['public']['Tables']['experiences']['Update']) {
+    const { data, error } = await supabase
+      .from('experiences')
+      .update({ ...updates, updated_at: new Date().toISOString() })
+      .eq('id', id)
+      .select()
+      .single()
+
+    if (error) throw error
+    return data
+  },
+
+  async deleteExperience(id: string) {
+    const { error } = await supabase
+      .from('experiences')
       .delete()
       .eq('id', id)
 

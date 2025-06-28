@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import CertificationSection from './CertificationSection';
 import DocumentSection from './DocumentSection';
-import { Company, CertificationFormData } from '../../types';
+import ExperienceSection from './ExperienceSection';
+import { Company, CertificationFormData, ExperienceFormData } from '../../types';
 
 interface ProfileContentProps {
   company: Company;
@@ -9,6 +10,9 @@ interface ProfileContentProps {
   onDeleteCertification: (id: string) => Promise<void>;
   onAddDocument: (file: File) => Promise<void>;
   onDeleteDocument: (id: string) => Promise<void>;
+  onAddExperience: (formData: ExperienceFormData) => Promise<void>;
+  onUpdateExperience: (id: string, formData: ExperienceFormData) => Promise<void>;
+  onDeleteExperience: (id: string) => Promise<void>;
 }
 
 /**
@@ -19,11 +23,15 @@ const ProfileContent: React.FC<ProfileContentProps> = ({
   onAddCertification, 
   onDeleteCertification, 
   onAddDocument, 
-  onDeleteDocument 
+  onDeleteDocument,
+  onAddExperience,
+  onUpdateExperience,
+  onDeleteExperience
 }) => {
-  const [activeTab, setActiveTab] = useState('certifications');
+  const [activeTab, setActiveTab] = useState('experiences');
 
   const tabs = [
+    { id: 'experiences', label: 'Past Experiences', count: company.experiences.length },
     { id: 'certifications', label: 'Certifications', count: company.certifications.length },
     { id: 'documents', label: 'Documents', count: company.documents.length }
   ];
@@ -54,6 +62,15 @@ const ProfileContent: React.FC<ProfileContentProps> = ({
 
       {/* Tab content */}
       <div className="p-6">
+        {activeTab === 'experiences' && (
+          <ExperienceSection 
+            experiences={company.experiences}
+            onAddExperience={onAddExperience}
+            onUpdateExperience={onUpdateExperience}
+            onDeleteExperience={onDeleteExperience}
+          />
+        )}
+        
         {activeTab === 'certifications' && (
           <CertificationSection 
             certifications={company.certifications}

@@ -221,6 +221,65 @@ export interface Database {
           proposal_id?: string | null
         }
       }
+      experiences: {
+        Row: {
+          id: string
+          company_id: string
+          project_name: string
+          client_name: string
+          description: string
+          start_date: string
+          end_date: string | null
+          project_value: number | null
+          category: string
+          status: 'completed' | 'ongoing' | 'cancelled'
+          location: string
+          key_achievements: string[]
+          technologies: string[] | null
+          team_size: number | null
+          role: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          company_id: string
+          project_name: string
+          client_name: string
+          description: string
+          start_date: string
+          end_date?: string | null
+          project_value?: number | null
+          category: string
+          status?: 'completed' | 'ongoing' | 'cancelled'
+          location: string
+          key_achievements?: string[]
+          technologies?: string[] | null
+          team_size?: number | null
+          role: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          company_id?: string
+          project_name?: string
+          client_name?: string
+          description?: string
+          start_date?: string
+          end_date?: string | null
+          project_value?: number | null
+          category?: string
+          status?: 'completed' | 'ongoing' | 'cancelled'
+          location?: string
+          key_achievements?: string[]
+          technologies?: string[] | null
+          team_size?: number | null
+          role?: string
+          created_at?: string
+          updated_at?: string
+        }
+      }
       attestations: {
         Row: {
           id: string

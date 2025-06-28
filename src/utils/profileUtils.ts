@@ -13,6 +13,7 @@ export interface ProfileCompletionCriteria {
   establishedYear: boolean;
   hasCertifications: boolean;
   hasDocuments: boolean;
+  hasExperiences: boolean;
 }
 
 /**
@@ -52,7 +53,10 @@ export const calculateProfileCompletion = (company: Company): number => {
     hasCertifications: company.certifications.length > 0,
     
     // Has at least one document
-    hasDocuments: company.documents.length > 0
+    hasDocuments: company.documents.length > 0,
+    
+    // Has at least one experience
+    hasExperiences: company.experiences.length > 0
   };
 
   // Count completed criteria
@@ -122,6 +126,10 @@ export const getMissingCriteria = (company: Company): string[] => {
   
   if (company.documents.length === 0) {
     missing.push('Upload documents');
+  }
+  
+  if (company.experiences.length === 0) {
+    missing.push('Add past experiences');
   }
   
   return missing;

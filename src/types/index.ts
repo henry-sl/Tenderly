@@ -41,6 +41,7 @@ export interface Company {
   established: Date;
   certifications: Certification[];
   documents: Document[];
+  experiences: Experience[];
 }
 
 export interface Certification {
@@ -50,6 +51,23 @@ export interface Certification {
   issueDate: Date;
   expiryDate?: Date;
   documentUrl?: string;
+}
+
+export interface Experience {
+  id: string;
+  projectName: string;
+  clientName: string;
+  description: string;
+  startDate: Date;
+  endDate?: Date;
+  projectValue?: number;
+  category: string;
+  status: 'completed' | 'ongoing' | 'cancelled';
+  location: string;
+  keyAchievements: string[];
+  technologies?: string[];
+  teamSize?: number;
+  role: string;
 }
 
 export interface Proposal {
@@ -110,4 +128,20 @@ export interface DocumentFormData {
   name: string;
   type: string;
   size: number;
+}
+
+export interface ExperienceFormData {
+  projectName: string;
+  clientName: string;
+  description: string;
+  startDate: string;
+  endDate?: string;
+  projectValue?: number;
+  category: string;
+  status: 'completed' | 'ongoing' | 'cancelled';
+  location: string;
+  keyAchievements: string[];
+  technologies?: string[];
+  teamSize?: number;
+  role: string;
 }
